@@ -1,0 +1,2 @@
+python view_mydatabase.py
+pause
