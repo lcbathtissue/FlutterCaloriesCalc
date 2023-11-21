@@ -1,6 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
 
 
 class DatabaseHelper {
@@ -13,7 +15,26 @@ class DatabaseHelper {
   }
 
   Future<void> initDatabase() async {
-    _database = await _initDatabase();
+    bool databaseExists = await checkDatabaseExists();
+    if (!databaseExists) {
+      await _createDatabase();
+      await insertInitialData();
+    }
+  }
+
+  Future<bool> checkDatabaseExists() async {
+    String path = join(await getDatabasesPath(), 'FlutterCaloriesCalc_db.sqlite');
+    return databaseFactory.databaseExists(path);
+  }
+
+  Future<void> _createDatabase() async {
+    String path = join(await getDatabasesPath(), 'FlutterCaloriesCalc_db.sqlite');
+    _database = await openDatabase(path, version: 1, onCreate: _createDb);
+  }
+
+  Future<void> insertInitialData() async {
+    await insertFoodsFromFile();
+    await insertAddressesFromFile();
   }
 
   Future<Database> _initDatabase() async {
@@ -113,31 +134,82 @@ class DatabaseHelper {
     return await db.delete('addresses', where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<void> insertFoodsFromFile() async {
+    try {
+      String foodsData = await rootBundle.loadString('foods');
+      List<String> foodsList = foodsData.split('\n');
+
+      Database db = await database;
+      Batch batch = db.batch();
+
+      for (String foodLine in foodsList) {
+        List<String> foodInfo = foodLine.split('    '); // Split by your delineator
+        String name = foodInfo[0].trim();
+        int calories = int.tryParse(foodInfo[1].trim()) ?? 0; // Parse calories as int
+
+        batch.insert('foods', {'name': name, 'calories': calories});
+      }
+
+      await batch.commit();
+      print('Foods inserted successfully.');
+    } catch (e) {
+      print('Error inserting foods: $e');
+    }
+  }
 
   Future<void> insertAddressesFromFile() async {
     try {
-      Directory appDocDir = await getApplicationDocumentsDirectory();
-      File file = File('${appDocDir.path}/addresses.txt');
+      String addresses = await rootBundle.loadString('addresses');
+      List<String> addressList = addresses.split('\n');
 
-      if (await file.exists()) {
-        List<String> addresses = await file.readAsLines();
+      Database db = await database;
+      Batch batch = db.batch();
 
-        Database db = await database;
-        Batch batch = db.batch();
-
-        for (String address in addresses) {
-          batch.insert('addresses', {'address': address});
-        }
-
-        await batch.commit();
-        print('Addresses inserted successfully.');
-      } else {
-        print('File not found.');
+      for (String address in addressList) {
+        batch.insert('addresses', {'address': address});
       }
+
+      await batch.commit();
+      print('Addresses inserted successfully.');
     } catch (e) {
       print('Error inserting addresses: $e');
     }
   }
 
+  Future<int> clearFoodsTable() async {
+    Database db = await database;
+    return await db.delete('foods');
+  }
 
+  Future<int> clearMealPlanTable() async {
+    Database db = await database;
+    return await db.delete('meal_plan');
+  }
+
+  Future<int> clearAddressesTable() async {
+    Database db = await database;
+    return await db.delete('addresses');
+  }
+
+  Future<void> clearAllTables() async {
+    await clearFoodsTable();
+    await clearMealPlanTable();
+    await clearAddressesTable();
+    print('All tables cleared.');
+  }
+
+  Future<void> deleteDatabaseFile() async {
+    String path = join(await getDatabasesPath(), 'FlutterCaloriesCalc_db.sqlite');
+    if (await databaseExists(path)) {
+      Database? db = _database;
+      if (db != null && db.isOpen) {
+        await db.close();
+      }
+      await deleteDatabase(path);
+      _database = null; // Reset the database reference after deletion
+      print('Database file deleted successfully.');
+    } else {
+      print('Database file does not exist.');
+    }
+  }
 }
