@@ -63,7 +63,7 @@ class _MealPlanState extends State<MealPlan> {
     List<int> selectedFoodIds = [];
     for (int i = 0; i < foodItems.length; i++) {
       if (checkboxStates[i]) {
-        selectedFoodIds.add(foodItems[i]['id'] as int); // Replace 'id' with your food ID field
+        selectedFoodIds.add(foodItems[i]['id'] as int); 
       }
     }
 

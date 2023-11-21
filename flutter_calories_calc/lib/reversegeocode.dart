@@ -17,6 +17,6 @@ class ReverseGeocode {
     return {
       'latitude': 0.0,
       'longitude': 0.0,
-    }; // Return default values or handle errors
+    };
   }
 }

@@ -15,7 +15,7 @@ class _AddressesPageState extends State<AddressesPage> {
   final TextEditingController longController = TextEditingController();
   List<Map<String, dynamic>> addresses = [];
   Map<String, dynamic> selectedAddress = {};
-  ReverseGeocode reverseGeocode = ReverseGeocode(); // Initialize ReverseGeocode here
+  ReverseGeocode reverseGeocode = ReverseGeocode(); // Initialize ReverseGeocode
 
   @override
   void initState() {

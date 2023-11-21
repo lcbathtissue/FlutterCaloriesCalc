@@ -157,7 +157,7 @@ class DatabaseHelper {
       Batch batch = db.batch();
 
       for (String foodLine in foodsList) {
-        List<String> foodInfo = foodLine.split('    '); // Split by your delineator
+        List<String> foodInfo = foodLine.split('    '); // Split using the delineator
         String name = foodInfo[0].trim();
         int calories = int.tryParse(foodInfo[1].trim()) ?? 0; // Parse calories as int
 
