@@ -54,10 +54,18 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE meal_plan (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT
+      );
+    ''');
+
+    await db.execute('''
+      CREATE TABLE meal_plan_food_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        meal_plan_id INTEGER,
         food_id INTEGER,
-        date TEXT,
+        FOREIGN KEY (meal_plan_id) REFERENCES meal_plan(id),
         FOREIGN KEY (food_id) REFERENCES foods(id)
-      )
+      );
     ''');
 
     await db.execute('''
@@ -110,6 +118,12 @@ class DatabaseHelper {
   Future<int> deleteMealPlan(int id) async {
     Database db = await database;
     return await db.delete('meal_plan', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // function to insert a food item in the 'meal_plan_food_items' table
+  Future<int> insertMealPlanFoodItem(Map<String, dynamic> mealPlanFoodItem) async {
+    Database db = await database;
+    return await db.insert('meal_plan_food_items', mealPlanFoodItem);
   }
 
   // CRUD operations for the 'addresses' table

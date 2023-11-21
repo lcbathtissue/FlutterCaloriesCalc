@@ -17,7 +17,7 @@ class _MealPlanState extends State<MealPlan> {
   @override
   void initState() {
     super.initState();
-    targetCaloriesController.text = "200";
+    targetCaloriesController.text = "2000";
     dateController.text = _getFormattedDate(DateTime.now());
     _fetchFoodItems(); 
   }
@@ -58,6 +58,34 @@ class _MealPlanState extends State<MealPlan> {
     return total;
   }
 
+  Future<void> _insertMealPlan() async {
+    // Prepare the list of selected food IDs
+    List<int> selectedFoodIds = [];
+    for (int i = 0; i < foodItems.length; i++) {
+      if (checkboxStates[i]) {
+        selectedFoodIds.add(foodItems[i]['id'] as int); // Replace 'id' with your food ID field
+      }
+    }
+
+    // Define the meal plan to be inserted
+    Map<String, dynamic> newMealPlan = {
+      'date': dateController.text, // Use the date from the controller
+    };
+
+    // Insert the meal plan into the database
+    int insertedMealPlanId = await DatabaseHelper().insertMealPlan(newMealPlan);
+
+    // Insert the selected foods for the inserted meal plan
+    for (int foodId in selectedFoodIds) {
+      await DatabaseHelper().insertMealPlanFoodItem(
+        {'meal_plan_id': insertedMealPlanId, 'food_id': foodId}
+      );
+    }
+
+    // Check the ID for confirmation or any other action
+    print('Inserted Meal Plan ID: $insertedMealPlanId');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,6 +123,13 @@ class _MealPlanState extends State<MealPlan> {
                 fontWeight: FontWeight.bold,
                 color: textColor,
               ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                await _insertMealPlan(); 
+              },
+              child: Text('Add Meal Plan'),
             ),
             SizedBox(height: 20),
             Expanded(
