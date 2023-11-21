@@ -11,12 +11,13 @@ class _MealPlanState extends State<MealPlan> {
   final TextEditingController dateController = TextEditingController();
   List<Map<String, dynamic>> foodItems = [];
   List<bool> checkboxStates = []; 
+  Color textColor = Colors.black;
   int totalCalories = 0;
 
   @override
   void initState() {
     super.initState();
-    targetCaloriesController.text = "2000";
+    targetCaloriesController.text = "200";
     dateController.text = _getFormattedDate(DateTime.now());
     _fetchFoodItems(); 
   }
@@ -35,6 +36,7 @@ class _MealPlanState extends State<MealPlan> {
 
   void _updateTotalCalories() {
     int total = 0;
+    int targetCalories = int.tryParse(targetCaloriesController.text) ?? 0; 
     for (int i = 0; i < foodItems.length; i++) {
       if (checkboxStates[i]) {
         total += foodItems[i]['calories'] as int;
@@ -42,6 +44,7 @@ class _MealPlanState extends State<MealPlan> {
     }
     setState(() {
       totalCalories = total;
+      textColor = (totalCalories <= targetCalories) ? Colors.black : Colors.red;
     });
   }
 
@@ -87,7 +90,11 @@ class _MealPlanState extends State<MealPlan> {
             SizedBox(height: 20),
             Text(
               'Total Calories: $totalCalories',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18, 
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
             ),
             SizedBox(height: 20),
             Expanded(
