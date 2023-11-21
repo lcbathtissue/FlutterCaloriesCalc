@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'databasehelper.dart'; 
+import 'mealplan.dart';
 import 'addresses.dart';
 
 void main() async {
@@ -40,20 +41,38 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Addresses Button'),
+        title: const Text('FlutterCaloriesCalc App Navigation'),
       ),
       body: Center(
-        child: TextButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddressesPage()),
-            );
-          },
-          child: Text(
-            'ADDRESSES',
-            style: TextStyle(color: Colors.blue, fontSize: 20.0),
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to the MealPlan screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MealPlan()),
+                );
+              },
+              child: Text('MEAL PLANS'),
+            ),
+
+            SizedBox(height: 20), // Add spacing between buttons
+
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to the MealPlan screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddressesPage()),
+                );
+              },
+              child: Text('ADDRESSES'),
+            ),
+
+          ],
         ),
       ),
     );
